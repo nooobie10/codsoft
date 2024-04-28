@@ -1,0 +1,73 @@
+
+Program: 
+class PlanningProblem: 
+ def __init__(self, initial_state, goal_state): 
+ self.initial_state = initial_state 
+ self.goal_state = goal_state 
+ def actions(self, state): 
+ # Define possible actions based on the current state  possible_actions = [] 
+ for block, on_block in state.items(): 
+ if on_block == 'table': 
+ possible_actions.append(('stack', block, 'table'))  else: 
+ possible_actions.append(('unstack', block, on_block))  for other_block in state.keys(): 
+ if other_block != block and state[other_block] == 'table':  possible_actions.append(('stack', block, other_block))  return possible_actions 
+ def result(self, state, action): 
+ # Apply action to the state and return the new state  new_state = state.copy() 
+ if action[0] == 'stack': 
+ new_state[action[1]] = action[2] 
+ elif action[0] == 'unstack': 
+ new_state[action[1]] = 'table' 
+ return new_state 
+ def goal_test(self, state): 
+ # Check if the current state satisfies the goal state  return state == self.goal_state 
+ def plan(self): 
+ # Generate a plan to reach the goal state from the initial state  current_state = self.initial_state 
+ plan = [] 
+ plan_states = [current_state.copy()] 
+ while not self.goal_test(current_state): 
+ possible_actions = self.actions(current_state)  for action in possible_actions: 
+ next_state = self.result(current_state, action)  plan.append((action, next_state)) 
+ current_state = next_state 
+ plan_states.append(current_state.copy()) 
+ if self.goal_test(current_state): 
+ break 
+ return plan, plan_states 
+def get_input_blocks():
+ num_blocks = int(input("Enter the number of blocks: ")) 
+ blocks = [] 
+ for i in range(num_blocks): 
+ block_name = input(f"Enter the name of block {i+1}: ") 
+ blocks.append(block_name) 
+ return blocks 
+def main(): 
+ blocks = get_input_blocks() 
+ initial_state = {} 
+ goal_state = {} 
+ for block in blocks: 
+ initial_state[block] = 'table' 
+ goal_state[block] = 'table' 
+ for i, block in enumerate(blocks): 
+ on_block = input(f"Enter the block on top of which block {block} should be placed (or  'table'): ") 
+ if on_block != 'table': 
+ initial_state[block] = on_block 
+ else: 
+ initial_state[block] = 'table' 
+ for i, block in enumerate(blocks): 
+ on_block = input(f"Enter the block on top of which block {block} should be placed in  the goal state (or 'table'): ") 
+ if on_block != 'table': 
+ goal_state[block] = on_block 
+ else: 
+ goal_state[block] = 'table' 
+ # Create a planning problem instance 
+ problem = PlanningProblem(initial_state, goal_state) 
+ # Generate a plan 
+ plan, plan_states = problem.plan() 
+ # Print the plan and states 
+ print("Plan:") 
+ for action, next_state in plan: 
+ print("Action:", action) 
+ print("Next State:", next_state) 
+ print() 
+ print("Final Goal State:", plan_states[-1]) 
+if __name__ == "__main__": 
+ main()
