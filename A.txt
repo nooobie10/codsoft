@@ -1,0 +1,44 @@
+import heapq 
+def heuristic(node, goal): 
+    return 0 
+def astar(graph, start, goal): 
+    frontier = [] 
+    heapq.heappush(frontier, (0, start)) 
+    came_from = {start: None} 
+    cost_so_far = {start: 0} 
+    while frontier: 
+        current_cost, current_node = heapq.heappop(frontier)  
+        if current_node == goal: 
+            path = [] 
+            while current_node is not None: 
+                path.append(current_node) 
+                current_node = came_from[current_node] 
+            return path[::-1], cost_so_far[goal] 
+        for neighbor, cost in graph[current_node].items(): 
+            new_cost = cost_so_far[current_node] + cost 
+            if neighbor not in cost_so_far or new_cost < cost_so_far[neighbor]:  
+                cost_so_far[neighbor] = new_cost 
+                priority = new_cost + heuristic(neighbor, goal)  
+                heapq.heappush(frontier, (priority, neighbor)) 
+                came_from[neighbor] = current_node 
+    return None, None 
+if __name__ == "__main__": 
+    graph = {} 
+    num_edges = int(input("Enter the number of edges: "))  
+    for _ in range(num_edges):
+        start, end, cost = input("Enter edge (start, end, cost): ").split() 
+        cost = float(cost) 
+        if start not in graph: 
+            graph[start] = {} 
+        if end not in graph: 
+            graph[end] = {} 
+        graph[start][end] = cost 
+        graph[end][start] = cost 
+    start_node = input("Enter the start node: ") 
+    goal_node = input("Enter the goal node: ") 
+    path, total_cost = astar(graph, start_node, goal_node) 
+    if path: 
+        print("Path found:", path) 
+        print("Total cost:", total_cost) 
+    else: 
+        print("No path found")
